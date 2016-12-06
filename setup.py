@@ -8,8 +8,8 @@ import os
 import sys
 
 
-name = 'django-csv-wrangler'
-package = 'django_csv_wrangler'
+name = 'csv-wrangler'
+package = 'csv_wrangler'
 description = 'Statically-typed CSV helpers'
 url = 'http://www.dabapps.com'
 author = 'DabApps'
