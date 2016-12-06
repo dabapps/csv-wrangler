@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -e
+
+export PATH=env/bin:${PATH}
+export DEBUG=true
+export IN_TEST=true
+
+echo "--------------"
+echo "Running python type checking"
+mypy --silent-imports --strict-optional  --warn-no-return --check-untyped-defs django_csv_wrangler
+echo "Ok!"
+
+echo "--------------"
+echo "Running Flake8 linting"
+flake8 project --ignore=E128,E501 --exclude="migrations,settings,*/wsgi.py"
+echo "Ok!"
+
+echo "--------------"
+echo "Running django tests"
+coverage run --source=project --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
+if [[ -z "$@" ]]; then
+    coverage report
+    coverage html
+fi
