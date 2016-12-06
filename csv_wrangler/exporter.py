@@ -103,7 +103,7 @@ class SimpleExporter(Exporter):
 
     def get_csv_headers(self) -> List[SimpleHeader]:
         return [
-            SimpleHeader(label=field_name, callback=lambda record, field_name: str(record.get(field_name))) for field_name in self.fields
+            SimpleHeader(label=field_name, callback=lambda record, field_name: str(record.get(field_name)) if record.get(field_name) is not None else '') for field_name in self.fields
         ]
 
     def get_csv_header_labels(self) -> List[str]:
