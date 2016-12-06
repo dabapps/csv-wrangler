@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
+import csv
 from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic
 from typing import Optional  # noqa
 from functools import reduce
+from django.http import HttpResponse
 
 
 T = TypeVar('T')
@@ -62,6 +64,13 @@ class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
             for record in records
         ]
         return [self.get_header_labels()] + lines
+
+    def as_response(self, filename: str='export') -> HttpResponse:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+        writer = csv.writer(response)
+        [writer.writerow(row) for row in self.to_list()]
+        return response
 
 
 class MultiExporter(BaseExporter):

@@ -64,6 +64,17 @@ class ExporterTestCase(TestCase):
         self.assertEqual(results[2], ['2', 'b', '2.0'])
         self.assertEqual(results[3], ['3', 'c', '3.0'])
 
+    def test_as_response(self) -> None:
+        filename = 'hello'
+        results = self.exporter.as_response(filename)
+        self.assertEqual(results['content-type'], 'text/csv')
+        self.assertEqual(results['Content-Disposition'], 'attachment; filename="{}.csv"'.format(filename))
+        self.assertEqual(str(results.content, 'utf-8'), '\r\n'.join([
+            ','.join(row)
+            for row
+            in self.exporter.to_list()
+        ]) + '\r\n')
+
 
 class MultiExporterTestCase(TestCase):
 
