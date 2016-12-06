@@ -9,5 +9,5 @@ env:
 install:
 - pip install -r test-requirements.txt
 - pip install -U django==$DJANGO_VERSION
-script: runtests
+script: ./runtests
 repo: dabapps/csv-wrangler
