@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.com/dabapps/csv-wrangler.svg?token=apzD3FKHpTNKHAtAu9xC&branch=master)](https://travis-ci.com/dabapps/csv-wrangler)
-Django CSV Wrangler
+CSV Wrangler
 ===================
 Statically typed Python 3 CSV generation helpers.
 Write nicely typed CSV handling logic, with reorderable headers!
@@ -10,13 +10,13 @@ Settings
 Currently not on `pip`, as this isn't quite ready to hit the big time.  Whack this into your requirements file:
 
 ```
-    -e git+git@github.com:dabapps/csv-wrangler.git@v0.1.0#egg=django-csv-wrangler
+    -e git+git@github.com:dabapps/csv-wrangler.git@v0.1.0#egg=csv-wrangler
 ```
 
 And then add it to your `INSTALLED_APPS`
 
 ```python
-    'django_csv_wrangler'
+    'csv_wrangler'
 ```
 
 Usage
@@ -45,7 +45,7 @@ class LlamaExporter(Exporter):
         Header(label='name_length', callback=lambda llama: str(len(llama.name))),
     ]  # type: List[Header[Llama]]
 
-    def __init__(self, llamas: List[Llama) -> None:
+    def __init__(self, llamas: List[Llama]) -> None:
         self.data = llamas
 
     def fetch_records(self) -> List[Llama]:

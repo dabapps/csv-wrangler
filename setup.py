@@ -8,15 +8,15 @@ import os
 import sys
 
 
-name = 'django-csv-wrangler'
-package = 'django_csv_wrangler'
+name = 'csv-wrangler'
+package = 'csv_wrangler'
 description = 'Statically-typed CSV helpers'
 url = 'http://www.dabapps.com'
 author = 'DabApps'
 author_email = 'contact@dabapps.com'
 license = 'BSD'
 install_requires = [
-    "Django>=1.10",
+    "Django>=1.8",
 ]
 
 long_description = """Statically-typed CSV helpers"""

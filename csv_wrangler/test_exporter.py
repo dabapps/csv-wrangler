@@ -1,7 +1,7 @@
 from unittest import TestCase
 from typing import NamedTuple
 from typing import List, Any
-from django_csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter
+from csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter
 
 
 DummyData = NamedTuple('DummyData', [('a', str), ('b', int), ('c', float)])
