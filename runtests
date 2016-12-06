@@ -18,7 +18,7 @@ echo "Ok!"
 
 echo "--------------"
 echo "Running django tests"
-coverage run --source=project --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
+coverage run --source=django_csv_wrangler --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
 if [[ -z "$@" ]]; then
     coverage report
     coverage html
