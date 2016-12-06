@@ -44,7 +44,7 @@ class LlamaExporter(Exporter):
         Header(label='name_length', callback=lambda llama: str(len(llama.name))),
     ]  # type: List[Header[Llama]]
 
-    def __init__(self, llamas: List[Llama) -> None:
+    def __init__(self, llamas: List[Llama]) -> None:
         self.data = llamas
 
     def fetch_records(self) -> List[Llama]:

@@ -16,7 +16,7 @@ author = 'DabApps'
 author_email = 'contact@dabapps.com'
 license = 'BSD'
 install_requires = [
-    "Django>=1.10",
+    "Django>=1.8",
 ]
 
 long_description = """Statically-typed CSV helpers"""
