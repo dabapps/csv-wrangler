@@ -2,12 +2,12 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'django_csv_wrangler',
+        'NAME': 'csv_wrangler',
     }
 }
 
 INSTALLED_APPS = (
-    'django_csv_wrangler',
+    'csv_wrangler',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -35,7 +35,7 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
-        'django_csv_wrangler': {
+        'csv_wrangler': {
             'level': 'CRITICAL',
             'propagate': True,
         },

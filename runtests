@@ -8,7 +8,7 @@ export IN_TEST=true
 
 echo "--------------"
 echo "Running python type checking"
-mypy --silent-imports --strict-optional  --warn-no-return --check-untyped-defs django_csv_wrangler
+mypy --silent-imports --strict-optional  --warn-no-return --check-untyped-defs csv_wrangler
 echo "Ok!"
 
 echo "--------------"
@@ -18,7 +18,7 @@ echo "Ok!"
 
 echo "--------------"
 echo "Running django tests"
-coverage run --source=django_csv_wrangler --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
+coverage run --source=csv_wrangler --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
 if [[ -z "$@" ]]; then
     coverage report --fail-under=100
     coverage html
