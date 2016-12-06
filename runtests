@@ -20,6 +20,6 @@ echo "--------------"
 echo "Running django tests"
 coverage run --source=django_csv_wrangler --omit='*/wsgi.py,*/settings.py,*/migrations/*.py,*__init__*,*/test*.py,' manage.py test $@
 if [[ -z "$@" ]]; then
-    coverage report
+    coverage report --fail-under=100
     coverage html
 fi
