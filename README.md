@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/dabapps/csv-wrangler.svg?token=apzD3FKHpTNKHAtAu9xC&branch=master)](https://travis-ci.com/dabapps/csv-wrangler)
 Django CSV Wrangler
 ===================
 Statically typed Python 3 CSV generation helpers.
