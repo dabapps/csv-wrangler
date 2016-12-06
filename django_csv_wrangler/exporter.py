@@ -117,3 +117,24 @@ class SimpleExporter(Exporter):
             for record in records
         ]
         return [self.get_csv_header_labels()] + lines
+
+
+class PassthroughExporter(Exporter):
+
+    data = []  # type: List[List[str]]
+
+    def __init__(self, data: List[List[str]]) -> None:
+        self.data = data
+
+    def make_header(self, field_name: str, idx: int) -> Header[List[str]]:
+        return Header(label=field_name, callback=lambda record: record[idx])
+
+    def fetch_records(self) -> List[List[str]]:
+        return self.data[1:]
+
+    def get_headers(self) -> List[Header[List[str]]]:
+        return [
+            self.make_header(field_name, idx)
+            for idx, field_name in enumerate(self.data[0])
+        ]
+

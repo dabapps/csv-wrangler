@@ -1,7 +1,7 @@
 from unittest import TestCase
 from typing import NamedTuple
 from typing import List, Any
-from django_csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter
+from django_csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter
 
 
 DummyData = NamedTuple('DummyData', [('a', str), ('b', int), ('c', float)])
@@ -109,3 +109,17 @@ class SimpleExporterTestCase(TestCase):
         results = exporter.to_list()
         self.assertEqual(results[0], ['a', 'b', 'c'])
         self.assertEqual(results[1], ['5', '10', '15'])
+
+
+class PassthroughExporterTestCase(TestCase):
+
+    def test_passthrough_to_list(self) -> None:
+        exporter = PassthroughExporter([
+            ['a', 'b', 'c'],
+            ['1', '2', '3'],
+            ['2', '3', '4'],
+        ])
+        results = exporter.to_list()
+        self.assertEqual(results[0], ['a', 'b', 'c'])
+        self.assertEqual(results[1], ['1', '2', '3'])
+        self.assertEqual(results[2], ['2', '3', '4'])
