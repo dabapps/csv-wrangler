@@ -10,7 +10,7 @@ Settings
 Currently not on `pip`, as this isn't quite ready to hit the big time.  Whack this into your requirements file:
 
 ```
-    -e git+git@github.com:dabapps/csv-wrangler.git@v0.1.0#egg=csv-wrangler
+    git+git://github.com/dabapps/csv-wrangler.git@v0.1.0#egg=csv-wrangler
 ```
 
 And then add it to your `INSTALLED_APPS`
