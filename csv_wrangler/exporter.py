@@ -29,6 +29,13 @@ class BaseExporter(metaclass=ABCMeta):
     def to_list(self) -> List[List[str]]:  # pragma: no cover
         pass
 
+    def as_response(self, filename: str='export') -> HttpResponse:
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+        writer = csv.writer(response)
+        [writer.writerow(row) for row in self.to_list()]
+        return response
+
 
 class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
 
@@ -64,13 +71,6 @@ class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
             for record in records
         ]
         return [self.get_header_labels()] + lines
-
-    def as_response(self, filename: str='export') -> HttpResponse:
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
-        writer = csv.writer(response)
-        [writer.writerow(row) for row in self.to_list()]
-        return response
 
 
 class MultiExporter(BaseExporter):
@@ -119,22 +119,12 @@ class SimpleExporter(Exporter):
         return [self.get_csv_header_labels()] + lines
 
 
-class PassthroughExporter(Exporter):
+class PassthroughExporter(BaseExporter):
 
     data = []  # type: List[List[str]]
 
     def __init__(self, data: List[List[str]]) -> None:
         self.data = data
 
-    def make_header(self, field_name: str, idx: int) -> Header[List[str]]:
-        return Header(label=field_name, callback=lambda record: record[idx])
-
-    def fetch_records(self) -> List[List[str]]:
-        return self.data[1:]
-
-    def get_headers(self) -> List[Header[List[str]]]:
-        return [
-            self.make_header(field_name, idx)
-            for idx, field_name in enumerate(self.data[0])
-        ]
-
+    def to_list(self) -> List[List[str]]:
+        return self.data
