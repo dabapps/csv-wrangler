@@ -123,3 +123,14 @@ class PassthroughExporterTestCase(TestCase):
         self.assertEqual(results[0], ['a', 'b', 'c'])
         self.assertEqual(results[1], ['1', '2', '3'])
         self.assertEqual(results[2], ['2', '3', '4'])
+
+    def test_malformed_passthrough(self) -> None:
+        exporter = PassthroughExporter([
+            ['a', 'b', 'c'],
+            [],
+            ['d', 'e', 'f'],
+        ])
+        results = exporter.to_list()
+        self.assertEqual(results[0], ['a', 'b', 'c'])
+        self.assertEqual(results[1], [])
+        self.assertEqual(results[2], ['d', 'e', 'f'])
