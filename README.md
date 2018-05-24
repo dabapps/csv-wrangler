@@ -56,13 +56,21 @@ Here, our `fetch_records` is just spitting the data straight to the headers for 
 
 Note that we specify the type of the header for `headers`. This allows the typechecker to find out quickly if any of your headers are accessing data incorrectly.
 
-Now, we can use it. We have two methods for getting data out - `to_list` and `as_response`.  `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want) whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views
+Now, we can use it. We have several methods for getting data out:
+
+`to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
 
 ```python
 LlamaExporter(my_llamas).to_list()
+```
 
+whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views:
+
+```python
 LlamaExporter.as_response('my_llamas')
 ```
+
+If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `to_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
 
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
 
