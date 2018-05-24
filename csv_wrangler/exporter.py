@@ -3,7 +3,7 @@ import csv
 from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic, Generator
 from typing import Optional  # noqa
 from functools import reduce
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
 
 T = TypeVar('T')
@@ -16,6 +16,17 @@ class Header(Generic[T]):
     def __init__(self, label: str, callback: Callable[[T], str]) -> None:
         self.label = label
         self.callback = callback
+
+
+class Echo:
+    """
+    An object that implements just the write method of the file-like
+    interface.
+    https://docs.djangoproject.com/en/1.10/howto/outputting-csv/
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
 
 
 class BaseExporter(metaclass=ABCMeta):
@@ -37,6 +48,15 @@ class BaseExporter(metaclass=ABCMeta):
         response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
         writer = csv.writer(response)
         [writer.writerow(row) for row in self.to_list()]
+        return response
+
+    def as_streamed_response(self, filename: str='export') -> StreamingHttpResponse:
+        writer = csv.writer(Echo())
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in self.to_iter()),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
         return response
 
 
