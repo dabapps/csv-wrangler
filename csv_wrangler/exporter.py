@@ -37,7 +37,7 @@ class BaseExporter(metaclass=ABCMeta):
     header_order = None  # type: Optional[List[str]]
 
     @abstractmethod
-    def to_iter(self) -> Generator[List[str], None, None]:
+    def to_iter(self) -> Generator[List[str], None, None]:  # pragma: no cover
         pass
 
     def to_list(self) -> List[List[str]]:
@@ -65,7 +65,7 @@ class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
     headers = []  # type: List[Header[T]]
 
     @abstractmethod
-    def fetch_records(self) -> List[T]:
+    def fetch_records(self) -> List[T]:  # pragma: no cover
         pass
 
     def get_headers(self) -> List[Header[T]]:
