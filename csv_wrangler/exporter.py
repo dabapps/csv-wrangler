@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 import csv
-from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic
+from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic, Generator
 from typing import Optional  # noqa
 from functools import reduce
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
 
 T = TypeVar('T')
@@ -18,6 +18,17 @@ class Header(Generic[T]):
         self.callback = callback
 
 
+class Echo:
+    """
+    An object that implements just the write method of the file-like
+    interface.
+    https://docs.djangoproject.com/en/1.10/howto/outputting-csv/
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
 class BaseExporter(metaclass=ABCMeta):
     """
     The root exporter class
@@ -26,14 +37,26 @@ class BaseExporter(metaclass=ABCMeta):
     header_order = None  # type: Optional[List[str]]
 
     @abstractmethod
-    def to_list(self) -> List[List[str]]:  # pragma: no cover
+    def to_iter(self) -> Generator[List[str], None, None]:  # pragma: no cover
         pass
+
+    def to_list(self) -> List[List[str]]:
+        return list(self.to_iter())
 
     def as_response(self, filename: str='export') -> HttpResponse:
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
         writer = csv.writer(response)
         [writer.writerow(row) for row in self.to_list()]
+        return response
+
+    def as_streamed_response(self, filename: str='export') -> StreamingHttpResponse:
+        writer = csv.writer(Echo())
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in self.to_iter()),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
         return response
 
 
@@ -63,14 +86,12 @@ class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
                 self.header_order.index(header.label) if header.label in self.header_order else len(self.header_order)
         )
 
-    def to_list(self) -> List[List[str]]:
+    def to_iter(self) -> Generator[List[str], None, None]:
         records = self.fetch_records()
         headers = self.get_sorted_headers()
-        lines = [
-            [header.callback(record) for header in headers]
-            for record in records
-        ]
-        return [self.get_header_labels()] + lines
+        yield self.get_header_labels()
+        for record in records:
+            yield [header.callback(record) for header in headers]
 
 
 class MultiExporter(BaseExporter):
@@ -83,6 +104,12 @@ class MultiExporter(BaseExporter):
     def to_list(self) -> List[List[str]]:
         exportings = [exporter.to_list() for exporter in self.exporters]
         return reduce(lambda memo, exporting: exporting if memo == [] else memo + [[]] + exporting, exportings, [])
+
+    def to_iter(self) -> Generator[List[str], None, None]:
+        for exporter in self.exporters:
+            yield from exporter.to_iter()
+            if exporter != self.exporters[-1]:
+                yield []
 
 
 SimpleHeader = NamedTuple('Header', [('label', str), ('callback', Callable[[Any, str], str])])
@@ -109,14 +136,12 @@ class SimpleExporter(Exporter):
     def get_csv_header_labels(self) -> List[str]:
         return [header.label for header in self.get_csv_headers()]
 
-    def to_list(self) -> List[List[str]]:
+    def to_iter(self) -> Generator[List[str], None, None]:
         records = self.fetch_records()
         headers = self.get_csv_headers()
-        lines = [
-            [header.callback(record, header.label) for header in headers]
-            for record in records
-        ]
-        return [self.get_csv_header_labels()] + lines
+        yield self.get_csv_header_labels()
+        for record in records:
+            yield [header.callback(record, header.label) for header in headers]
 
 
 class PassthroughExporter(BaseExporter):
@@ -126,5 +151,5 @@ class PassthroughExporter(BaseExporter):
     def __init__(self, data: List[List[str]]) -> None:
         self.data = data
 
-    def to_list(self) -> List[List[str]]:
-        return self.data
+    def to_iter(self) -> Generator[List[str], None, None]:
+        yield from self.data
