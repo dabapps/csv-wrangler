@@ -2,6 +2,7 @@ from unittest import TestCase
 from typing import NamedTuple
 from typing import List, Any
 from csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter
+from django.http import StreamingHttpResponse, HttpResponse
 
 
 DummyData = NamedTuple('DummyData', [('a', str), ('b', int), ('c', float)])
@@ -48,6 +49,16 @@ class ExporterTestCase(TestCase):
         self.assertEqual(results[2], ['b', '2', '2.0'])
         self.assertEqual(results[3], ['c', '3', '3.0'])
 
+    def test_to_iter(self) -> None:
+        results = self.exporter.to_iter()
+        self.assertEqual(next(results), ['a', 'b', 'c'])
+        self.assertEqual(next(results), ['a', '1', '1.0'])
+        self.assertEqual(next(results), ['b', '2', '2.0'])
+        self.assertEqual(next(results), ['c', '3', '3.0'])
+
+    def test_to_iter_is_same_as_list(self) -> None:
+        self.assertListEqual(list(self.exporter.to_iter()), self.exporter.to_list())
+
     def test_ordering(self) -> None:
         self.exporter.header_order = ['c', 'b', 'a']
         results = self.exporter.to_list()
@@ -67,9 +78,22 @@ class ExporterTestCase(TestCase):
     def test_as_response(self) -> None:
         filename = 'hello'
         results = self.exporter.as_response(filename)
+        self.assertIsInstance(results, HttpResponse)
         self.assertEqual(results['content-type'], 'text/csv')
         self.assertEqual(results['Content-Disposition'], 'attachment; filename="{}.csv"'.format(filename))
         self.assertEqual(str(results.content, 'utf-8'), '\r\n'.join([
+            ','.join(row)
+            for row
+            in self.exporter.to_list()
+        ]) + '\r\n')
+
+    def test_as_streamed_response(self) -> None:
+        filename = 'hello'
+        results = self.exporter.as_streamed_response(filename)
+        self.assertIsInstance(results, StreamingHttpResponse)
+        self.assertEqual(results['content-type'], 'text/csv')
+        self.assertEqual(results['Content-Disposition'], 'attachment; filename="hello.csv"')
+        self.assertEqual(results.getvalue().decode(), '\r\n'.join([
             ','.join(row)
             for row
             in self.exporter.to_list()
@@ -97,6 +121,21 @@ class MultiExporterTestCase(TestCase):
         self.assertEqual(results[6], ['llama'])
         self.assertEqual(results[7], ['drama'])
 
+    def test_multiple_exporters_to_iter(self) -> None:
+        multi_exporter = MultiExporter([
+            self.exporter,
+            self.exporter_2
+        ])
+        results = multi_exporter.to_iter()
+        self.assertEqual(next(results), ['a', 'b', 'c'])
+        self.assertEqual(next(results), ['a', '1', '1.0'])
+        self.assertEqual(next(results), ['b', '2', '2.0'])
+        self.assertEqual(next(results), ['c', '3', '3.0'])
+        self.assertEqual(next(results), [])
+        self.assertEqual(next(results), ['dummy'])
+        self.assertEqual(next(results), ['llama'])
+        self.assertEqual(next(results), ['drama'])
+
 
 class SimpleExporterTestCase(TestCase):
 
@@ -109,6 +148,16 @@ class SimpleExporterTestCase(TestCase):
         results = exporter.to_list()
         self.assertEqual(results[0], ['a', 'b', 'c'])
         self.assertEqual(results[1], ['5', '', '15'])
+
+    def test_simple_exporter_to_iter(self) -> None:
+        exporter = SimpleExporter(['a', 'b', 'c'], [{
+            'a': 5,
+            'b': None,
+            'c': 15
+        }])
+        results = exporter.to_iter()
+        self.assertEqual(next(results), ['a', 'b', 'c'])
+        self.assertEqual(next(results), ['5', '', '15'])
 
 
 class PassthroughExporterTestCase(TestCase):
@@ -123,6 +172,17 @@ class PassthroughExporterTestCase(TestCase):
         self.assertEqual(results[0], ['a', 'b', 'c'])
         self.assertEqual(results[1], ['1', '2', '3'])
         self.assertEqual(results[2], ['2', '3', '4'])
+
+    def test_passthrough_to_iter(self) -> None:
+        exporter = PassthroughExporter([
+            ['a', 'b', 'c'],
+            ['1', '2', '3'],
+            ['2', '3', '4'],
+        ])
+        results = exporter.to_iter()
+        self.assertEqual(next(results), ['a', 'b', 'c'])
+        self.assertEqual(next(results), ['1', '2', '3'])
+        self.assertEqual(next(results), ['2', '3', '4'])
 
     def test_malformed_passthrough(self) -> None:
         exporter = PassthroughExporter([

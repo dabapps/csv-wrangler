@@ -37,10 +37,10 @@ class BaseExporter(metaclass=ABCMeta):
     header_order = None  # type: Optional[List[str]]
 
     @abstractmethod
-    def to_iter(self) -> Generator[List[str], None, None]:  # pragma: no cover
+    def to_iter(self) -> Generator[List[str], None, None]:
         pass
 
-    def to_list(self) -> List[List[str]]:  # pragma: no cover
+    def to_list(self) -> List[List[str]]:
         return list(self.to_iter())
 
     def as_response(self, filename: str='export') -> HttpResponse:
@@ -65,7 +65,7 @@ class Exporter(Generic[T], BaseExporter, metaclass=ABCMeta):
     headers = []  # type: List[Header[T]]
 
     @abstractmethod
-    def fetch_records(self) -> List[T]:  # pragma: no cover
+    def fetch_records(self) -> List[T]:
         pass
 
     def get_headers(self) -> List[Header[T]]:
