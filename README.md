@@ -47,7 +47,7 @@ def get_full_name(llama):
 class LlamaExporter(Exporter):
 
     headers = [
-        Header(label='name', callback=lambda llama: self.get_full_name(llama),
+        Header(label='name', callback=get_full_name)
         Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
         Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
     ]  # type: List[Header[Llama]]
