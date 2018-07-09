@@ -68,7 +68,17 @@ Now, we can use it. We have several methods for getting data out:
 `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
 
 ```python
-LlamaExporter(my_llamas).to_list()
+from project.common.exports.llama_exporter import LlamaExporter
+from project.llamas.models import Llama
+...
+
+
+def some_function_where_i_want_to_use_csv_data():
+    my_llamas = Llama.objects.all()
+    exporter = LLamaExporter(llamas=my_llamas)
+    data = exporter.to_list()
+    # perhaps pass data to other CSV handling options
+    return
 ```
 
 whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views:
@@ -76,13 +86,16 @@ whereas `as_response` will turn it into a prepared HttpResponse for returning fr
 ```python
 from rest_framework import generics
 from project.common.exports.llama_exporter import LlamaExporter
+from project.llamas.models import Llama
 ...
 
 
 class LlamaCsvExportView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
-        return LLamaExporter(llamas=Llama.objects.all()).as_response('my_llamas')
+        my_llamas = Llama.objects.all()
+        exporter = LLamaExporter(llamas=my_llamas)
+        return exporter.as_response('my_llamas')
 ```
 
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
@@ -95,17 +108,21 @@ If your CSV is large, and takes a long time to generate, you should use a genera
 
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
 
+So for example in your view, you can add:
+
 ```python
-LlamaExporter.header_order = ['name', 'name_length', 'fluff_factor']
+exporter = LLamaExporter(llamas=my_llamas)
+exporter.header_order = ['name', 'first_name_length', 'fluff_factor']
 ```
 
 If you end up in a situation where you need to output multiple CSV tables at once, you can use `MultiExporter`
 
 ```python
-MultiExporter(
+exporter = MultiExporter(
     LlamaExporter(my_llamas),
     AlpacaExporter(my_alpacas)
-).to_list()
+)
+exporter.to_list()
 ```
 
 This will append the second CSV after the first, with a single blank line between it.
