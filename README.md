@@ -28,21 +28,28 @@ Generally, you'll want to subclass `Exporter` and provide two required changes, 
 
 You'll also need to specify a type for your headers to run over. We recommend you go with something like a `NamedTuple`, but any blob of data that is meaningful to you will do.
 
-For example, we'll start with a simple type:
+For example, we'll start by creating a file in for example `project/common/exports/llama_exporter.py`:
 
 ```python
-    Llama = NamedTuple('Llama', [('name': str), ('fluff_factor': int)])
-```
+from typing import List
+from csv_wrangler.exporter import Exporter, Header
+from project.llamas.models import Llama
 
-Now, we'll need our derived class:
+# We start by defining Llama's type
+Llama = NamedTuple('Llama', [('first_name': str), ('last_name': str), ('fluff_factor': int)])
 
-```python
+# We can define a helper function if needed
+def get_full_name(llama):
+    return "{} {}".format(llama.first_name, llama.last_name)
+
+
+# And we'll need our derived class
 class LlamaExporter(Exporter):
 
     headers = [
-        Header(label='name', callback=lambda llama: llama.name,
+        Header(label='name', callback=lambda llama: self.get_full_name(llama),
         Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
-        Header(label='name_length', callback=lambda llama: str(len(llama.name))),
+        Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
     ]  # type: List[Header[Llama]]
 
     def __init__(self, llamas: List[Llama]) -> None:
@@ -67,7 +74,21 @@ LlamaExporter(my_llamas).to_list()
 whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views:
 
 ```python
-LlamaExporter.as_response('my_llamas')
+from rest_framework import generics
+from project.common.exports.llama_exporter import LlamaExporter
+...
+
+
+class LlamaCsvExportView(generics.GenericAPIView):
+
+    def get(self, request, *args, **kwargs):
+        return LLamaExporter(llamas=Llama.objects.all()).as_response('my_llamas')
+```
+
+When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
+
+```python
+url(r'^llamas/csv/$', LlamaCsvExportView.as_view(), name="llama-csv")
 ```
 
 If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `to_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
