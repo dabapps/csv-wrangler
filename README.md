@@ -47,7 +47,7 @@ def get_full_name(llama):
 class LlamaExporter(Exporter):
 
     headers = [
-        Header(label='name', callback=get_full_name)
+        Header(label='name', callback=get_full_name),
         Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
         Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
     ]  # type: List[Header[Llama]]
@@ -62,6 +62,27 @@ class LlamaExporter(Exporter):
 Here, our `fetch_records` is just spitting the data straight to the headers for unpacking. If you have more complex requirements, `fetch_records` is a good place to convert to a list of easily accessed blobs of data.
 
 Note that we specify the type of the header for `headers`. This allows the typechecker to find out quickly if any of your headers are accessing data incorrectly.
+
+When you want to access `self` in `headers`, you can use the function `get_headers` instead. (Try to avoid using this function if not necessary, as it will slow things down) For example, the `LlamaExporter` could look like this:
+
+```python
+class LlamaExporter(Exporter):
+
+    def __init__(self, llamas: List[Llama]) -> None:
+        self.data = llamas
+        self.llamas_are_cute = True
+
+    def fetch_records(self) -> List[Llama]:
+        return self.data
+
+    def get_headers(self) -> List[Header[Llama]]:
+        return [
+            Header(label='name', callback=get_full_name),
+            Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
+            Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
+            Header(label='are_llamas_cute?', callback=lambda llama: str(self.llamas_are_cute)),
+        ]
+```
 
 Now, we can use it. We have several methods for getting data out:
 
