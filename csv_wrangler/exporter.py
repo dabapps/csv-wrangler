@@ -47,14 +47,14 @@ class BaseExporter(metaclass=ABCMeta):
     def format_content_disposition(self, filename: str='export') -> str:
         return 'attachment; filename="{}.csv"'.format(filename)
 
-    def as_response(self, filename) -> HttpResponse:
+    def as_response(self, filename: str) -> HttpResponse:
         response = HttpResponse(content_type=self.CONTENT_TYPE)
         response['Content-Disposition'] = self.format_content_disposition(filename)
         writer = csv.writer(response)
         [writer.writerow(row) for row in self.to_list()]
         return response
 
-    def as_streamed_response(self, filename) -> StreamingHttpResponse:
+    def as_streamed_response(self, filename: str) -> StreamingHttpResponse:
         writer = csv.writer(Echo())
         response = StreamingHttpResponse(
             (writer.writerow(row) for row in self.to_iter()),
