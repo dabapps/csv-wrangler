@@ -154,6 +154,36 @@ exporter.to_list()
 
 This will append the second CSV after the first, with a single blank line between it.
 
-We also provide a `SimpleExporter`, for extracting information from a list of dictionaries, and a `PassthroughExporter`, for when you already have a List of Lists of Strings.
+### Simple Exporter
+We also provide a `SimpleExporter`, for extracting information from a list of dictionaries.
+
+Say you have a list of dictionaries
+
+```python
+dicts = [
+    {
+        'name': 'Lama glama',
+        'fluff_factor': 9,
+        'is_cute?': 'yes'
+    },{
+        'name': 'Lama guanicoe',
+        'fluff_factor': 2,
+    }
+]
+```
+Then you can create a simple exporter with `headers = ['name', 'fluff_factor', 'is_cute?']` as `exporter = SimpleExporter(headers, dicts)`.
+Your `exporter.to_list()` would be `[['name', 'fluff_factor', 'is_cute?'], ['Lama glama', '9', 'yes'], ['Lama guanicoe', '2', '']]`.
+
+### Passthrough Exporter
+You can use the `PassthroughExporter` when you already have a List of Lists of Strings.
+
+So when you have the exact data you want to put in your CSV, you can simply create an exporter like this
+```python
+exporter = PassthroughExporter([
+    ['name', 'fluff factor', 'is cute?'],
+    ['Alpaca LLama', '10', 'yes'],
+    ['Guanaco Llama', '6', 'no'],
+])
+```
 
 Have fun!
