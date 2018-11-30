@@ -140,14 +140,20 @@ class MultiExporterTestCase(TestCase):
 class SimpleExporterTestCase(TestCase):
 
     def test_simple_exporter(self) -> None:
-        exporter = SimpleExporter(['a', 'b', 'c'], [{
-            'a': 5,
-            'b': None,
-            'c': 15
-        }])
+        exporter = SimpleExporter(['a', 'b', 'c'], [
+            {
+                'a': 5,
+                'b': None,
+                'c': 15
+            },{
+                'a': 1,
+                'b': 2,
+            }
+        ])
         results = exporter.to_list()
         self.assertEqual(results[0], ['a', 'b', 'c'])
         self.assertEqual(results[1], ['5', '', '15'])
+        self.assertEqual(results[2], ['1', '2', ''])
 
     def test_simple_exporter_to_iter(self) -> None:
         exporter = SimpleExporter(['a', 'b', 'c'], [{

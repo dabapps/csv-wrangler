@@ -21,19 +21,18 @@ And then add it to your `INSTALLED_APPS`
 
 Usage
 -----
-
-Check `test_exporter.py` for some examples of it in action.
+### Create an Exporter
 
 Generally, you'll want to subclass `Exporter` and provide two required changes, `headers` and `fetch_records`. You'll also want a way to get data into the exporter - override `__init__` for this.
 
 You'll also need to specify a type for your headers to run over. We recommend you go with something like a `NamedTuple`, but any blob of data that is meaningful to you will do.
 
-For example, we'll start by creating a file in for example `project/common/exports/llama_exporter.py`:
+Let's create a `llama_exporter.py`:
 
 ```python
 from typing import List
 from csv_wrangler.exporter import Exporter, Header
-from project.llamas.models import Llama
+from .models import Llama
 
 # We start by defining Llama's type
 Llama = NamedTuple('Llama', [('first_name': str), ('last_name': str), ('fluff_factor': int)])
@@ -47,7 +46,7 @@ def get_full_name(llama):
 class LlamaExporter(Exporter):
 
     headers = [
-        Header(label='name', callback=get_full_name)
+        Header(label='name', callback=get_full_name),
         Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
         Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
     ]  # type: List[Header[Llama]]
@@ -63,26 +62,61 @@ Here, our `fetch_records` is just spitting the data straight to the headers for 
 
 Note that we specify the type of the header for `headers`. This allows the typechecker to find out quickly if any of your headers are accessing data incorrectly.
 
+When you want to access `self` in `headers`, you can use the function `get_headers` instead. (Try to avoid using this function if not necessary, as it will slow things down) For example, the `LlamaExporter` could look like this:
+
+```python
+class LlamaExporter(Exporter):
+
+    def __init__(self, llamas: List[Llama]) -> None:
+        self.data = llamas
+        self.llamas_are_cute = True
+
+    def fetch_records(self) -> List[Llama]:
+        return self.data
+
+    def get_headers(self) -> List[Header[Llama]]:
+        return [
+            Header(label='name', callback=get_full_name),
+            Header(label='fluff_factor', callback=lambda llama: str(llama.fluff_factor)),
+            Header(label='first_name_length', callback=lambda llama: str(len(llama.first_name))),
+            Header(label='are_llamas_cute?', callback=lambda llama: str(self.llamas_are_cute)),
+        ]
+```
+
+### Use the Exporter
 Now, we can use it. We have several methods for getting data out:
 
 `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
 
 ```python
-LlamaExporter(my_llamas).to_list()
+from .exporters import LlamaExporter
+from .models import Llama
+...
+
+
+def some_function_where_i_want_to_use_csv_data():
+    my_llamas = Llama.objects.all()
+    exporter = LLamaExporter(llamas=my_llamas)
+    data = exporter.to_list()
+    # perhaps pass data to other CSV handling options
+    return
 ```
 
 whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views:
 
 ```python
-from rest_framework import generics
-from project.common.exports.llama_exporter import LlamaExporter
+from django.views import View
+from .exporters import LlamaExporter
+from .models import Llama
 ...
 
 
-class LlamaCsvExportView(generics.GenericAPIView):
+class LlamaCsvExportView(View):
 
-    def get(self, request, *args, **kwargs):
-        return LLamaExporter(llamas=Llama.objects.all()).as_response('my_llamas')
+    def get(self, request):
+        my_llamas = Llama.objects.all()
+        exporter = LLamaExporter(llamas=my_llamas)
+        return exporter.as_response(filename='my_llamas')
 ```
 
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
@@ -91,26 +125,66 @@ When you want to setup and endpoint for getting the csv, this'll be as simple as
 url(r'^llamas/csv/$', LlamaCsvExportView.as_view(), name="llama-csv")
 ```
 
-If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `to_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
+Other nice features
+-----------------
+### Streamed Response
 
+If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `as_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
+
+### Ordering headers
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
 
+So for example in your view, you can add:
+
 ```python
-LlamaExporter.header_order = ['name', 'name_length', 'fluff_factor']
+exporter = LLamaExporter(llamas=my_llamas)
+exporter.header_order = ['name', 'first_name_length', 'fluff_factor']
 ```
 
+### Mulitple CSVs
 If you end up in a situation where you need to output multiple CSV tables at once, you can use `MultiExporter`
 
 ```python
-MultiExporter(
+exporter = MultiExporter(
     LlamaExporter(my_llamas),
     AlpacaExporter(my_alpacas)
-).to_list()
+)
+exporter.to_list()
 ```
 
 This will append the second CSV after the first, with a single blank line between it.
 
-We also provide a `SimpleExporter`, for extracting information from a list of dictionaries, and a `PassthroughExporter`, for when you already have a List of Lists of Strings.
+### Simple Exporter
+We also provide a `SimpleExporter`, for extracting information from a list of dictionaries.
+
+Say you have a list of dictionaries
+
+```python
+dicts = [
+    {
+        'name': 'Lama glama',
+        'fluff_factor': 9,
+        'is_cute?': 'yes'
+    },{
+        'name': 'Lama guanicoe',
+        'fluff_factor': 2,
+    }
+]
+```
+Then you can create a simple exporter with `headers = ['name', 'fluff_factor', 'is_cute?']` as `exporter = SimpleExporter(headers, dicts)`.
+Your `exporter.to_list()` would be `[['name', 'fluff_factor', 'is_cute?'], ['Lama glama', '9', 'yes'], ['Lama guanicoe', '2', '']]`.
+
+### Passthrough Exporter
+You can use the `PassthroughExporter` when you already have a List of Lists of Strings.
+
+So when you have the exact data you want to put in your CSV, you can simply create an exporter like this
+```python
+exporter = PassthroughExporter([
+    ['name', 'fluff factor', 'is cute?'],
+    ['Alpaca LLama', '10', 'yes'],
+    ['Guanaco Llama', '6', 'no'],
+])
+```
 
 Have fun!
 
