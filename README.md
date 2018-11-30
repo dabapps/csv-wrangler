@@ -21,6 +21,7 @@ And then add it to your `INSTALLED_APPS`
 
 Usage
 -----
+### Create Exporter
 
 Generally, you'll want to subclass `Exporter` and provide two required changes, `headers` and `fetch_records`. You'll also want a way to get data into the exporter - override `__init__` for this.
 
@@ -82,6 +83,7 @@ class LlamaExporter(Exporter):
         ]
 ```
 
+### Use Exporter
 Now, we can use it. We have several methods for getting data out:
 
 `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
@@ -123,8 +125,13 @@ When you want to setup and endpoint for getting the csv, this'll be as simple as
 url(r'^llamas/csv/$', LlamaCsvExportView.as_view(), name="llama-csv")
 ```
 
+Other nice things
+-----------------
+### Streamed Response
+
 If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `to_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
 
+### Ordering headers
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
 
 So for example in your view, you can add:
@@ -134,6 +141,7 @@ exporter = LLamaExporter(llamas=my_llamas)
 exporter.header_order = ['name', 'first_name_length', 'fluff_factor']
 ```
 
+### Mulitple CSVs
 If you end up in a situation where you need to output multiple CSV tables at once, you can use `MultiExporter`
 
 ```python
