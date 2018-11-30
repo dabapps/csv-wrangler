@@ -21,7 +21,7 @@ And then add it to your `INSTALLED_APPS`
 
 Usage
 -----
-### Create Exporter
+### Create an Exporter
 
 Generally, you'll want to subclass `Exporter` and provide two required changes, `headers` and `fetch_records`. You'll also want a way to get data into the exporter - override `__init__` for this.
 
@@ -83,7 +83,7 @@ class LlamaExporter(Exporter):
         ]
 ```
 
-### Use Exporter
+### Use the Exporter
 Now, we can use it. We have several methods for getting data out:
 
 `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
@@ -125,7 +125,7 @@ When you want to setup and endpoint for getting the csv, this'll be as simple as
 url(r'^llamas/csv/$', LlamaCsvExportView.as_view(), name="llama-csv")
 ```
 
-Other nice things
+Other nice features
 -----------------
 ### Streamed Response
 
