@@ -116,7 +116,7 @@ class LlamaCsvExportView(View):
     def get(self, request):
         my_llamas = Llama.objects.all()
         exporter = LLamaExporter(llamas=my_llamas)
-        return exporter.as_response('my_llamas')
+        return exporter.as_response(filename='my_llamas')
 ```
 
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
@@ -129,7 +129,7 @@ Other nice features
 -----------------
 ### Streamed Response
 
-If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `to_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
+If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `as_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
 
 ### Ordering headers
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
