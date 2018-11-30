@@ -35,6 +35,7 @@ class BaseExporter(metaclass=ABCMeta):
     """
 
     header_order = None  # type: Optional[List[str]]
+    CONTENT_TYPE = 'text/csv' # type: str
 
     @abstractmethod
     def to_iter(self) -> Generator[List[str], None, None]:  # pragma: no cover
@@ -43,20 +44,23 @@ class BaseExporter(metaclass=ABCMeta):
     def to_list(self) -> List[List[str]]:
         return list(self.to_iter())
 
-    def as_response(self, filename: str='export') -> HttpResponse:
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+    def format_content_disposition(self, filename: str='export') -> str:
+        return 'attachment; filename="{}.csv"'.format(filename)
+
+    def as_response(self, filename) -> HttpResponse:
+        response = HttpResponse(content_type=self.CONTENT_TYPE)
+        response['Content-Disposition'] = self.format_content_disposition(filename)
         writer = csv.writer(response)
         [writer.writerow(row) for row in self.to_list()]
         return response
 
-    def as_streamed_response(self, filename: str='export') -> StreamingHttpResponse:
+    def as_streamed_response(self, filename) -> StreamingHttpResponse:
         writer = csv.writer(Echo())
         response = StreamingHttpResponse(
             (writer.writerow(row) for row in self.to_iter()),
-            content_type='text/csv'
+            content_type=self.CONTENT_TYPE
         )
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+        response['Content-Disposition'] = self.format_content_disposition(filename)
         return response
 
 
