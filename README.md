@@ -22,18 +22,16 @@ And then add it to your `INSTALLED_APPS`
 Usage
 -----
 
-Check `test_exporter.py` for some examples of it in action.
-
 Generally, you'll want to subclass `Exporter` and provide two required changes, `headers` and `fetch_records`. You'll also want a way to get data into the exporter - override `__init__` for this.
 
 You'll also need to specify a type for your headers to run over. We recommend you go with something like a `NamedTuple`, but any blob of data that is meaningful to you will do.
 
-For example, we'll start by creating a file in for example `project/common/exports/llama_exporter.py`:
+Let's create a `llama_exporter.py`:
 
 ```python
 from typing import List
 from csv_wrangler.exporter import Exporter, Header
-from project.llamas.models import Llama
+from .models import Llama
 
 # We start by defining Llama's type
 Llama = NamedTuple('Llama', [('first_name': str), ('last_name': str), ('fluff_factor': int)])
@@ -89,8 +87,8 @@ Now, we can use it. We have several methods for getting data out:
 `to_list` will convert the data to a list of lists of strings (allowing you to pass it to whatever other CSV handling options you want):
 
 ```python
-from project.common.exports.llama_exporter import LlamaExporter
-from project.llamas.models import Llama
+from .exporters import LlamaExporter
+from .models import Llama
 ...
 
 
@@ -105,15 +103,15 @@ def some_function_where_i_want_to_use_csv_data():
 whereas `as_response` will turn it into a prepared HttpResponse for returning from one of your views:
 
 ```python
-from rest_framework import generics
-from project.common.exports.llama_exporter import LlamaExporter
-from project.llamas.models import Llama
+from django.views import View
+from .exporters import LlamaExporter
+from .models import Llama
 ...
 
 
-class LlamaCsvExportView(generics.GenericAPIView):
+class LlamaCsvExportView(View):
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         my_llamas = Llama.objects.all()
         exporter = LLamaExporter(llamas=my_llamas)
         return exporter.as_response('my_llamas')
