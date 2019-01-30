@@ -10,7 +10,7 @@ Settings
 Currently not on `pip`, as this isn't quite ready to hit the big time.  Whack this into your requirements file:
 
 ```
-    git+git://github.com/dabapps/csv-wrangler.git@v0.1.2#egg=csv-wrangler
+    git+git://github.com/dabapps/csv-wrangler.git@v0.1.3#egg=csv-wrangler
 ```
 
 And then add it to your `INSTALLED_APPS`
@@ -191,4 +191,3 @@ Have fun!
 ## Code of conduct
 
 For guidelines regarding the code of conduct when contributing to this repository please review [https://www.dabapps.com/open-source/code-of-conduct/](https://www.dabapps.com/open-source/code-of-conduct/)
-
