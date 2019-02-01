@@ -1,26 +1,28 @@
-[![Build Status](https://travis-ci.com/dabapps/csv-wrangler.svg?token=apzD3FKHpTNKHAtAu9xC&branch=master)](https://travis-ci.com/dabapps/csv-wrangler)
 CSV Wrangler
 ===================
+[![Build Status](https://travis-ci.com/dabapps/csv-wrangler.svg?token=apzD3FKHpTNKHAtAu9xC&branch=master)](https://travis-ci.com/dabapps/csv-wrangler)
+[![pypi release](https://img.shields.io/pypi/v/csv-wrangler.svg)](https://pypi.python.org/pypi/csv-wrangler)
+
 Statically typed Python 3 CSV generation helpers.
 Write nicely typed CSV handling logic, with reorderable headers!
 
-Settings
---------
+## Getting Started
 
-Currently not on `pip`, as this isn't quite ready to hit the big time.  Whack this into your requirements file:
+### Installation
 
-```
-    git+git://github.com/dabapps/csv-wrangler.git@v0.1.3#egg=csv-wrangler
-```
+Install from PIP
 
-And then add it to your `INSTALLED_APPS`
+    pip install csv-wrangler
 
-```python
-    'csv_wrangler'
-```
+Add `csv_wrangler` to your installed apps
 
-Usage
------
+    INSTALLED_APPS = (
+        ...
+        'csv_wrangler',
+    )
+
+## Usage
+
 ### Create an Exporter
 
 Generally, you'll want to subclass `Exporter` and provide two required changes, `headers` and `fetch_records`. You'll also want a way to get data into the exporter - override `__init__` for this.
