@@ -10,7 +10,7 @@ Write nicely typed CSV handling logic, with reorderable headers!
 
 ### Installation
 
-Install from PIP
+Install with `pip`
 
     pip install csv-wrangler
 
