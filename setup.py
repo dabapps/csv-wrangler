@@ -10,7 +10,7 @@ import sys
 
 name = 'csv-wrangler'
 package = 'csv_wrangler'
-description = 'Statically-typed CSV helpers'
+description = 'Statically-typed Python 3 CSV generation helpers'
 url = 'http://www.dabapps.com'
 author = 'DabApps'
 author_email = 'engineering@dabapps.com'
@@ -19,7 +19,8 @@ install_requires = [
     "Django>=1.8",
 ]
 
-long_description = """Statically-typed CSV helpers"""
+long_description = """Statically-typed Python 3 CSV generation helpers.
+    Write nicely typed CSV handling logic, with reorderable headers!"""
 
 def get_version(package):
     """
