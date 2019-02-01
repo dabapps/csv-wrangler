@@ -3,7 +3,7 @@ CSV Wrangler
 [![Build Status](https://travis-ci.com/dabapps/csv-wrangler.svg?token=apzD3FKHpTNKHAtAu9xC&branch=master)](https://travis-ci.com/dabapps/csv-wrangler)
 [![pypi release](https://img.shields.io/pypi/v/csv-wrangler.svg)](https://pypi.python.org/pypi/csv-wrangler)
 
-Statically typed Python 3 CSV generation helpers.
+Statically-typed Python 3 CSV generation helpers.
 Write nicely typed CSV handling logic, with reorderable headers!
 
 ## Getting Started
