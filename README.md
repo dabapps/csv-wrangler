@@ -121,7 +121,7 @@ class LlamaCsvExportView(View):
         return exporter.as_response(filename='my_llamas')
 ```
 
-If you simply want to get access to the CSV rows as strings, you can use the `as_csv_rows` method, which returns each row of the CSV in a list.
+If you simply want to get access to the CSV rows as strings, you can use the `as_csv_rows` method, which returns each row of the CSV in a list (as a generator).
 
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
 
@@ -137,9 +137,9 @@ If your CSV is large, and takes a long time to generate, you should use a genera
 
 ### Save to file-like object
 
-Sometimes, you may need to save the CSV rather than return it as a response. To do this, you can pass a file-like object to the `save` method. The CSV will be saved into the file, without loading the whole thing into memory first.
+Sometimes, you may need to save the CSV rather than return it as a response. To do this, you can pass a file-like object to the `dump` method. The CSV will be dumped into the file, without loading the whole thing into memory first.
 
-This can be combined with [`StringIO`](https://docs.python.org/3/library/io.html#io.StringIO) to access the entire CSV as a string (not recommended for large CSVs)
+This can be combined with [`StringIO`](https://docs.python.org/3/library/io.html#io.StringIO) to access the entire CSV as a string (not recommended for large CSVs).
 
 ### Ordering headers
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.

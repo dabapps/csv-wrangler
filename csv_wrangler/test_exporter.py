@@ -101,9 +101,9 @@ class ExporterTestCase(TestCase):
             in self.exporter.to_list()
         ]) + '\r\n')
 
-    def test_save(self) -> None:
+    def test_dump(self) -> None:
         buffer = StringIO()
-        self.exporter.save(buffer)
+        self.exporter.dump(buffer)
         self.assertEqual(buffer.getvalue(), dedent("""
             a,b,c
             a,1,1.0
