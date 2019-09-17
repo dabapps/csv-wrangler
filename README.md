@@ -121,7 +121,7 @@ class LlamaCsvExportView(View):
         return exporter.as_response(filename='my_llamas')
 ```
 
-If you don't want to deal with any further CSV parsing, and just want to get the finished CSV as a string, use the `as_string` method.
+If you don't want to deal with any further CSV parsing, and just want to get the finished CSV as a string, use the `as_string` method. If you need to send the string as a response, it's likely more optimal to use the `as_response` or `as_streamed_response` methods.
 
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
 
