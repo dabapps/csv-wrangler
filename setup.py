@@ -16,7 +16,7 @@ author = 'DabApps'
 author_email = 'engineering@dabapps.com'
 license = 'BSD'
 install_requires = [
-    "Django>=1.8",
+    "Django>=1.11",
 ]
 
 long_description = """Statically-typed Python 3 CSV generation helpers.
