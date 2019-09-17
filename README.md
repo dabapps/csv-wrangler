@@ -121,6 +121,8 @@ class LlamaCsvExportView(View):
         return exporter.as_response(filename='my_llamas')
 ```
 
+If you don't want to deal with any further CSV parsing, and just want to get the finished CSV as a string, use the `as_csv` method.
+
 When you want to setup and endpoint for getting the csv, this'll be as simple as adding the following to `urls.py`
 
 ```python
