@@ -100,8 +100,8 @@ class ExporterTestCase(TestCase):
             in self.exporter.to_list()
         ]) + '\r\n')
 
-    def test_as_csv(self) -> None:
-        data = self.exporter.as_csv()
+    def test_as_string(self) -> None:
+        data = self.exporter.as_string()
         self.assertEqual(data, dedent("""
             a,b,c
             a,1,1.0
