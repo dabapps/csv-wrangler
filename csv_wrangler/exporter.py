@@ -4,6 +4,7 @@ from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic, Gene
 from typing import Optional  # noqa
 from functools import reduce
 from django.http import HttpResponse, StreamingHttpResponse
+from io import StringIO
 
 
 T = TypeVar('T')
@@ -47,11 +48,15 @@ class BaseExporter(metaclass=ABCMeta):
     def format_content_disposition(self, filename: str='export') -> str:
         return 'attachment; filename="{}.csv"'.format(filename)
 
+    def as_csv(self) -> str:
+        buffer = StringIO()
+        writer = csv.writer(buffer)
+        writer.writerows(self.to_iter())
+        return buffer.getvalue()
+
     def as_response(self, filename: str) -> HttpResponse:
-        response = HttpResponse(content_type=self.CONTENT_TYPE)
+        response = HttpResponse(content=self.as_csv().encode(), content_type=self.CONTENT_TYPE)
         response['Content-Disposition'] = self.format_content_disposition(filename)
-        writer = csv.writer(response)
-        [writer.writerow(row) for row in self.to_list()]
         return response
 
     def as_streamed_response(self, filename: str) -> StreamingHttpResponse:
