@@ -47,6 +47,11 @@ class BaseExporter(metaclass=ABCMeta):
     def save(self, out: TextIO):
         return csv.writer(out).writerows(self.to_iter())
 
+    def as_csv_rows(self) -> Generator[List[str], None, None]:
+        writer = csv.writer(Echo())
+        for line in self.to_iter():
+            yield writer.writerow(line)
+
     def format_content_disposition(self, filename: str='export') -> str:
         return 'attachment; filename="{}.csv"'.format(filename)
 
@@ -57,9 +62,8 @@ class BaseExporter(metaclass=ABCMeta):
         return response
 
     def as_streamed_response(self, filename: str) -> StreamingHttpResponse:
-        writer = csv.writer(Echo())
         response = StreamingHttpResponse(
-            (writer.writerow(row) for row in self.to_iter()),
+            self.as_csv_rows(),
             content_type=self.CONTENT_TYPE
         )
         response['Content-Disposition'] = self.format_content_disposition(filename)
