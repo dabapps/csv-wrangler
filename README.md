@@ -133,6 +133,12 @@ Other nice features
 
 If your CSV is large, and takes a long time to generate, you should use a generator, or stream the response. `to_iter` and `as_streamed_response` are the generator_counterparts to the above methods, working in exactly the same way, just returning a generator and a `HttpStreamedResponse` respectively. By default, `to_list` calls `to_iter`, so if you need to do anything custom, it's best to do it in `to_iter`.
 
+### Save to file-like object
+
+Sometimes, you may need to save the CSV rather than return it as a response. To do this, you can pass a file-like object to the `save` method. The CSV will be saved into the file, without loading the whole thing into memory first.
+
+This can be combined with [`StringIO`](https://docs.python.org/3/library/io.html#io.StringIO) to access the entire CSV as a string (not recommended for large CSVs)
+
 ### Ordering headers
 You can also provide an ordering to the headers, if you want.  Simply assign a list of strings to `header_order` and when the data is unpacked, those headers who's labels match these will be placed in that order.
 

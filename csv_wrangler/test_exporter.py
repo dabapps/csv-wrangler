@@ -1,8 +1,10 @@
 from unittest import TestCase
 from typing import NamedTuple
 from typing import List, Any
-from csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter
+from csv_wrangler.exporter import Exporter, Header, MultiExporter, SimpleExporter, PassthroughExporter, Echo
 from django.http import StreamingHttpResponse, HttpResponse
+from io import StringIO
+from textwrap import dedent
 
 
 DummyData = NamedTuple('DummyData', [('a', str), ('b', int), ('c', float)])
@@ -98,6 +100,16 @@ class ExporterTestCase(TestCase):
             for row
             in self.exporter.to_list()
         ]) + '\r\n')
+
+    def test_save(self) -> None:
+        buffer = StringIO()
+        print(self.exporter.save(buffer))
+        self.assertEqual(buffer.getvalue(), dedent("""
+            a,b,c
+            a,1,1.0
+            b,2,2.0
+            c,3,3.0
+        """).replace("\n", "\r\n").lstrip())
 
 
 class MultiExporterTestCase(TestCase):

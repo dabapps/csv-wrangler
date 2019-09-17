@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import csv
-from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic, Generator
+from typing import List, Any, NamedTuple, Callable, Dict, TypeVar, Generic, Generator, TextIO
 from typing import Optional  # noqa
 from functools import reduce
 from django.http import HttpResponse, StreamingHttpResponse
@@ -44,14 +44,16 @@ class BaseExporter(metaclass=ABCMeta):
     def to_list(self) -> List[List[str]]:
         return list(self.to_iter())
 
+    def save(self, out: TextIO):
+        return csv.writer(out).writerows(self.to_iter())
+
     def format_content_disposition(self, filename: str='export') -> str:
         return 'attachment; filename="{}.csv"'.format(filename)
 
     def as_response(self, filename: str) -> HttpResponse:
         response = HttpResponse(content_type=self.CONTENT_TYPE)
         response['Content-Disposition'] = self.format_content_disposition(filename)
-        writer = csv.writer(response)
-        [writer.writerow(row) for row in self.to_list()]
+        self.save(response)
         return response
 
     def as_streamed_response(self, filename: str) -> StreamingHttpResponse:
