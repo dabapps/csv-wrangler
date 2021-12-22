@@ -94,7 +94,7 @@ class ExporterTestCase(TestCase):
         results = self.exporter.as_response(filename, charset='cp1252')
         self.assertIsInstance(results, HttpResponse)
         self.assertEqual(results['content-type'], 'text/csv')
-        self.assertEqual(results['Content-Disposition'], f'attachment; filename="{filename}.csv"')
+        self.assertEqual(results['Content-Disposition'], 'attachment; filename="{}.csv"'.format(filename))
         self.assertEqual(str(results.content, 'cp1252'), '\r\n'.join([
             ','.join(row)
             for row
@@ -106,7 +106,7 @@ class ExporterTestCase(TestCase):
         results = self.exporter.as_streamed_response(filename)
         self.assertIsInstance(results, StreamingHttpResponse)
         self.assertEqual(results['content-type'], 'text/csv')
-        self.assertEqual(results['Content-Disposition'], f'attachment; filename="{filename}.csv"')
+        self.assertEqual(results['Content-Disposition'], 'attachment; filename="{}.csv"'.format(filename))
         self.assertEqual(results.getvalue().decode(), '\r\n'.join([
             ','.join(row)
             for row
@@ -118,7 +118,7 @@ class ExporterTestCase(TestCase):
         results = self.exporter.as_streamed_response(filename, charset='cp1252')
         self.assertIsInstance(results, StreamingHttpResponse)
         self.assertEqual(results['content-type'], 'text/csv')
-        self.assertEqual(results['Content-Disposition'], f'attachment; filename="{filename}.csv"')
+        self.assertEqual(results['Content-Disposition'], 'attachment; filename="{}.csv"'.format(filename))
         self.assertEqual(results.getvalue().decode(), '\r\n'.join([
             ','.join(row)
             for row
